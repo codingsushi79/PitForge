@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -17,6 +17,7 @@
 
 # production
 /build
+pitforge-link/dist/
 
 # misc
 .DS_Store
