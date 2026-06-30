@@ -3,10 +3,10 @@ name: Build PitForge Link (Windows)
 on:
   workflow_dispatch:
   push:
-    paths:
-      - "pitforge-link/**"
     branches:
       - main
+    tags:
+      - "v*"
 
 jobs:
   build:
