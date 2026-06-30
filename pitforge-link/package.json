@@ -9,7 +9,9 @@
     "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --win",
-    "dist:win": "electron-builder --win nsis"
+    "predist": "node build/generate-icon.js",
+    "predist:win": "node build/generate-icon.js",
+    "dist:win": "electron-builder --win nsis --publish never"
   },
   "dependencies": {
     "adm-zip": "^0.5.18",
