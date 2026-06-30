@@ -1,9 +1,16 @@
+let mockDriverSwapTick = 0;
+
 function createMockTelemetry(trackId = "spa") {
+  mockDriverSwapTick++;
+  const drivers = ["A. Driver", "B. Co-Driver"];
+  const activeDriver = drivers[mockDriverSwapTick % 2];
+
   const vehicles = Array.from({ length: 12 }, (_, i) => ({
     id: i,
+    carNumber: i === 3 ? 83 : 7 + i,
     position: i + 1,
-    driverName: `Driver ${i + 1}`,
-    teamName: `Team ${String.fromCharCode(65 + (i % 5))}`,
+    driverName: i === 3 ? activeDriver : `Driver ${i + 1}`,
+    teamName: i === 3 ? "PitForge Racing" : `Team ${String.fromCharCode(65 + (i % 5))}`,
     carClass: i < 4 ? "Hypercar" : "LMGT3",
     lap: 15 + Math.floor(Math.random() * 3),
     lapTime: 105 + Math.random() * 8,
@@ -18,7 +25,7 @@ function createMockTelemetry(trackId = "spa") {
       rl: { wear: 25 + Math.random() * 35, temp: 80 + Math.random() * 15, pressure: 23, compound: "Medium" },
       rr: { wear: 25 + Math.random() * 35, temp: 80 + Math.random() * 15, pressure: 23, compound: "Medium" },
     },
-    trackProgress: Math.random(),
+    trackProgress: ((i / 12 + mockDriverSwapTick * 0.008) % 1 + 1) % 1,
     inPits: false,
     pitCount: Math.floor(Math.random() * 3),
     sector1: 28 + Math.random() * 3,
@@ -38,6 +45,8 @@ function createMockTelemetry(trackId = "spa") {
     flag: "green",
     vehicles,
     playerVehicleId: 3,
+    trackedCarNumber: 83,
+    trackedTeamName: "PitForge Racing",
     weather: {
       ambientTemp: 22 + Math.random() * 5,
       trackTemp: 35 + Math.random() * 10,

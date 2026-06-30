@@ -1,5 +1,39 @@
-const { getConfig } = require("./config");
+const { getConfig, setConfig } = require("./config");
 const { readTelemetry } = require("./telemetry-windows");
+
+function lockTeamTracking(data) {
+  const config = getConfig();
+  let trackedCarNumber = config.trackedCarNumber;
+  let trackedTeamName = config.trackedTeamName || "";
+
+  if (!trackedCarNumber && !trackedTeamName) {
+    const player = data.vehicles.find((v) => v.id === data.playerVehicleId);
+    if (player) {
+      trackedCarNumber = player.carNumber ?? null;
+      trackedTeamName = player.teamName ?? "";
+      setConfig({ trackedCarNumber, trackedTeamName });
+    }
+  }
+
+  let playerVehicleId = data.playerVehicleId;
+  if (trackedCarNumber != null) {
+    const match = data.vehicles.find((v) => v.carNumber === trackedCarNumber);
+    if (match) playerVehicleId = match.id;
+  } else if (trackedTeamName) {
+    const team = trackedTeamName.toLowerCase().trim();
+    const match = data.vehicles.find(
+      (v) => (v.teamName || "").toLowerCase().trim() === team
+    );
+    if (match) playerVehicleId = match.id;
+  }
+
+  return {
+    ...data,
+    trackedCarNumber: trackedCarNumber ?? undefined,
+    trackedTeamName: trackedTeamName || undefined,
+    playerVehicleId,
+  };
+}
 
 class TelemetryClient {
   constructor() {
@@ -50,6 +84,7 @@ class TelemetryClient {
 
   async start(shareCode) {
     await this.stop();
+    setConfig({ trackedCarNumber: null, trackedTeamName: "" });
     await this.resolveShareCode(shareCode);
 
     this.tick = 0;
@@ -71,7 +106,8 @@ class TelemetryClient {
         }
 
         if (result.data) {
-          await this.send(result.data);
+          const payload = lockTeamTracking(result.data);
+          await this.send(payload);
           this.tick++;
           this.lastSource = result.source;
           this.lastError = null;

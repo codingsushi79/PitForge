@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, setupFiles } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { downloadFile } from "@/lib/storage";
+import { downloadFile, getPublicFileUrl } from "@/lib/storage";
 
 export async function GET(
   _req: NextRequest,
@@ -10,6 +10,11 @@ export async function GET(
   const { id } = await params;
   const [file] = await db.select().from(setupFiles).where(eq(setupFiles.id, id)).limit(1);
   if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const publicUrl = getPublicFileUrl(file.filePath);
+  if (publicUrl) {
+    return NextResponse.redirect(publicUrl);
+  }
 
   try {
     const buffer = await downloadFile(file.filePath);

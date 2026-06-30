@@ -1,5 +1,7 @@
 export interface TelemetryVehicle {
   id: number;
+  /** Car number — stable across driver swaps in endurance */
+  carNumber: number;
   position: number;
   driverName: string;
   teamName: string;
@@ -52,6 +54,10 @@ export interface TelemetrySession {
   flag: "green" | "yellow" | "red" | "blue" | "chequered" | "sc";
   vehicles: TelemetryVehicle[];
   playerVehicleId: number;
+  /** Locked on first packet — car number stays with the team through driver swaps */
+  trackedCarNumber?: number;
+  /** Locked on first packet — team name for fallback matching */
+  trackedTeamName?: string;
   weather: TelemetryWeather;
   warnings: TelemetryWarning[];
 }
@@ -63,9 +69,65 @@ export interface TelemetryWarning {
   vehicleId?: number;
 }
 
+export function resolvePlayerVehicle(session: TelemetrySession): TelemetryVehicle | undefined {
+  const { vehicles } = session;
+  if (session.trackedCarNumber != null) {
+    const byNumber = vehicles.find((v) => v.carNumber === session.trackedCarNumber);
+    if (byNumber) return byNumber;
+  }
+  if (session.trackedTeamName) {
+    const team = session.trackedTeamName.toLowerCase().trim();
+    const byTeam = vehicles.find((v) => v.teamName.toLowerCase().trim() === team);
+    if (byTeam) return byTeam;
+  }
+  return vehicles.find((v) => v.id === session.playerVehicleId);
+}
+
+export function resolvePlayerVehicleId(session: TelemetrySession): number {
+  return resolvePlayerVehicle(session)?.id ?? session.playerVehicleId;
+}
+
+/** Keep pit wall locked to the team car when drivers swap or slot ids shift. */
+export function normalizeTelemetrySession(
+  data: TelemetrySession,
+  existing?: Pick<TelemetrySession, "trackedCarNumber" | "trackedTeamName">
+): TelemetrySession {
+  let trackedCarNumber = data.trackedCarNumber ?? existing?.trackedCarNumber;
+  let trackedTeamName = data.trackedTeamName ?? existing?.trackedTeamName;
+
+  if (trackedCarNumber == null && !trackedTeamName) {
+    const player = data.vehicles.find((v) => v.id === data.playerVehicleId);
+    if (player) {
+      trackedCarNumber = player.carNumber;
+      trackedTeamName = player.teamName;
+    }
+  }
+
+  let playerVehicleId = data.playerVehicleId;
+  if (trackedCarNumber != null) {
+    const match = data.vehicles.find((v) => v.carNumber === trackedCarNumber);
+    if (match) playerVehicleId = match.id;
+  } else if (trackedTeamName) {
+    const team = trackedTeamName.toLowerCase().trim();
+    const match = data.vehicles.find(
+      (v) => v.teamName.toLowerCase().trim() === team
+    );
+    if (match) playerVehicleId = match.id;
+  }
+
+  const normalized = {
+    ...data,
+    trackedCarNumber,
+    trackedTeamName,
+    playerVehicleId,
+  };
+  normalized.warnings = generateWarnings(normalized);
+  return normalized;
+}
+
 export function generateWarnings(data: TelemetrySession): TelemetryWarning[] {
   const warnings: TelemetryWarning[] = [];
-  const player = data.vehicles.find((v) => v.id === data.playerVehicleId);
+  const player = resolvePlayerVehicle(data);
 
   if (player) {
     if (player.fuel < player.fuelCapacity * 0.15) {
@@ -151,12 +213,19 @@ export function generateWarnings(data: TelemetrySession): TelemetryWarning[] {
   return warnings;
 }
 
+let mockDriverSwapTick = 0;
+
 export function createMockTelemetry(trackId = "spa"): TelemetrySession {
+  mockDriverSwapTick++;
+  const drivers = ["A. Driver", "B. Co-Driver"];
+  const activeDriver = drivers[mockDriverSwapTick % 2];
+
   const vehicles: TelemetryVehicle[] = Array.from({ length: 12 }, (_, i) => ({
     id: i,
+    carNumber: i === 3 ? 83 : 7 + i,
     position: i + 1,
-    driverName: `Driver ${i + 1}`,
-    teamName: `Team ${String.fromCharCode(65 + (i % 5))}`,
+    driverName: i === 3 ? activeDriver : `Driver ${i + 1}`,
+    teamName: i === 3 ? "PitForge Racing" : `Team ${String.fromCharCode(65 + (i % 5))}`,
     carClass: i < 4 ? "Hypercar" : "LMGT3",
     lap: 15 + Math.floor(Math.random() * 3),
     lapTime: 105 + Math.random() * 8,
@@ -171,7 +240,7 @@ export function createMockTelemetry(trackId = "spa"): TelemetrySession {
       rl: { wear: 25 + Math.random() * 35, temp: 80 + Math.random() * 15, pressure: 23 + Math.random() * 2, compound: "Medium" },
       rr: { wear: 25 + Math.random() * 35, temp: 80 + Math.random() * 15, pressure: 23 + Math.random() * 2, compound: "Medium" },
     },
-    trackProgress: Math.random(),
+    trackProgress: ((i / 12 + mockDriverSwapTick * 0.008) % 1 + 1) % 1,
     inPits: false,
     pitCount: Math.floor(Math.random() * 3),
     sector1: 28 + Math.random() * 3,
@@ -191,6 +260,8 @@ export function createMockTelemetry(trackId = "spa"): TelemetrySession {
     flag: "green",
     vehicles,
     playerVehicleId: 3,
+    trackedCarNumber: 83,
+    trackedTeamName: "PitForge Racing",
     weather: {
       ambientTemp: 22 + Math.random() * 5,
       trackTemp: 35 + Math.random() * 10,
@@ -201,5 +272,5 @@ export function createMockTelemetry(trackId = "spa"): TelemetrySession {
     warnings: [],
   };
   session.warnings = generateWarnings(session);
-  return session;
+  return normalizeTelemetrySession(session);
 }

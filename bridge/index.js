@@ -22,9 +22,10 @@ if (!SESSION_ID) {
 function createMockTelemetry() {
   const vehicles = Array.from({ length: 12 }, (_, i) => ({
     id: i,
+    carNumber: i === 3 ? 83 : 7 + i,
     position: i + 1,
-    driverName: `Driver ${i + 1}`,
-    teamName: `Team ${String.fromCharCode(65 + (i % 5))}`,
+    driverName: i === 3 ? "A. Driver" : `Driver ${i + 1}`,
+    teamName: i === 3 ? "PitForge Racing" : `Team ${String.fromCharCode(65 + (i % 5))}`,
     carClass: i < 4 ? "Hypercar" : "LMGT3",
     lap: 15 + Math.floor(Math.random() * 3),
     lapTime: 105 + Math.random() * 8,
@@ -59,6 +60,8 @@ function createMockTelemetry() {
     flag: "green",
     vehicles,
     playerVehicleId: 3,
+    trackedCarNumber: 83,
+    trackedTeamName: "PitForge Racing",
     weather: {
       ambientTemp: 22,
       trackTemp: 38,

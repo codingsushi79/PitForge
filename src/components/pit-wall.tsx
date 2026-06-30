@@ -1,6 +1,7 @@
 "use client";
 
 import type { TelemetrySession, TelemetryWarning } from "@/lib/telemetry";
+import { resolvePlayerVehicle } from "@/lib/telemetry";
 import { formatDuration, formatLapTime } from "@/lib/utils";
 import { TrackMap } from "./track-map";
 import {
@@ -19,7 +20,8 @@ interface PitWallProps {
 }
 
 export function PitWall({ data, trackLayoutId = "gp" }: PitWallProps) {
-  const player = data.vehicles.find((v) => v.id === data.playerVehicleId);
+  const player = resolvePlayerVehicle(data);
+  const playerVehicleId = player?.id ?? data.playerVehicleId;
 
   return (
     <div className="space-y-4">
@@ -44,7 +46,7 @@ export function PitWall({ data, trackLayoutId = "gp" }: PitWallProps) {
             trackId={data.trackId}
             layoutId={trackLayoutId}
             vehicles={data.vehicles}
-            playerVehicleId={data.playerVehicleId}
+            playerVehicleId={playerVehicleId}
           />
         </div>
 
@@ -54,7 +56,7 @@ export function PitWall({ data, trackLayoutId = "gp" }: PitWallProps) {
         </div>
       </div>
 
-      <StandingsTable vehicles={data.vehicles} playerVehicleId={data.playerVehicleId} />
+      <StandingsTable vehicles={data.vehicles} playerVehicleId={playerVehicleId} />
 
       {player && <TyrePanel tyres={player.tyres} />}
     </div>
@@ -125,6 +127,10 @@ function PlayerCard({ player }: { player: TelemetrySession["vehicles"][0] }) {
   return (
     <div className="card">
       <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">Your Car</h3>
+      <div className="mb-3 text-sm">
+        <div className="font-semibold">#{player.carNumber} {player.teamName}</div>
+        <div className="text-muted">{player.driverName}</div>
+      </div>
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-muted">Position</span>
@@ -169,7 +175,9 @@ function StandingsTable({ vehicles, playerVehicleId }: { vehicles: TelemetrySess
         <thead>
           <tr className="border-b border-border text-left text-xs uppercase text-muted">
             <th className="pb-2 pr-3">Pos</th>
+            <th className="pb-2 pr-3">#</th>
             <th className="pb-2 pr-3">Driver</th>
+            <th className="pb-2 pr-3">Team</th>
             <th className="pb-2 pr-3">Class</th>
             <th className="pb-2 pr-3">Lap</th>
             <th className="pb-2 pr-3">Last</th>
@@ -186,7 +194,9 @@ function StandingsTable({ vehicles, playerVehicleId }: { vehicles: TelemetrySess
               className={`border-b border-border/50 ${v.id === playerVehicleId ? "bg-accent/5" : ""}`}
             >
               <td className="py-1.5 pr-3 font-mono font-semibold">{v.position}</td>
+              <td className="py-1.5 pr-3 font-mono text-muted">{v.carNumber}</td>
               <td className="py-1.5 pr-3">{v.driverName}</td>
+              <td className="py-1.5 pr-3 text-xs text-muted">{v.teamName}</td>
               <td className="py-1.5 pr-3 text-xs text-muted">{v.carClass}</td>
               <td className="py-1.5 pr-3 font-mono">{v.lap}</td>
               <td className="py-1.5 pr-3 font-mono">{formatLapTime(v.lapTime)}</td>

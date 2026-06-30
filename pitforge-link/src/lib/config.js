@@ -8,6 +8,8 @@ const store = new Store({
     serverUrl: "http://localhost:3009",
     pluginInstalled: false,
     demoMode: false,
+    trackedCarNumber: null,
+    trackedTeamName: "",
   },
 });
 

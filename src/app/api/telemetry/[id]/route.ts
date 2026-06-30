@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { telemetrySessions, telemetrySnapshots } from "@/lib/db";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { normalizeTelemetrySession, type TelemetrySession } from "@/lib/telemetry";
 
 export async function GET(
   _req: NextRequest,
@@ -50,10 +51,28 @@ export async function POST(
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
 
+  const [prevSnapshot] = await db
+    .select()
+    .from(telemetrySnapshots)
+    .where(eq(telemetrySnapshots.sessionId, id))
+    .orderBy(desc(telemetrySnapshots.createdAt))
+    .limit(1);
+
+  let existing: Pick<TelemetrySession, "trackedCarNumber" | "trackedTeamName"> | undefined;
+  if (prevSnapshot) {
+    const prev = JSON.parse(prevSnapshot.dataJson) as TelemetrySession;
+    existing = {
+      trackedCarNumber: prev.trackedCarNumber,
+      trackedTeamName: prev.trackedTeamName,
+    };
+  }
+
+  const normalized = normalizeTelemetrySession(body as TelemetrySession, existing);
+
   await db.insert(telemetrySnapshots).values({
     id: uuidv4(),
     sessionId: id,
-    dataJson: JSON.stringify(body),
+    dataJson: JSON.stringify(normalized),
   });
 
   return NextResponse.json({ ok: true });

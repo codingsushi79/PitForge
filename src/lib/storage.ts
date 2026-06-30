@@ -125,3 +125,17 @@ export async function deleteFile(storedPath: string): Promise<void> {
 export function getStorageMode(): "r2" | "local" {
   return isR2Storage() ? "r2" : "local";
 }
+
+function normalizePublicBaseUrl(): string | null {
+  const raw = process.env.R2_PUBLIC_URL?.trim();
+  if (!raw) return null;
+  return raw.replace(/\/$/, "");
+}
+
+/** Public URL for an R2 object when R2_PUBLIC_URL is configured. */
+export function getPublicFileUrl(storedPath: string): string | null {
+  const base = normalizePublicBaseUrl();
+  if (!base || !storedPath.startsWith(R2_PREFIX)) return null;
+  const objectKey = storedPath.slice(R2_PREFIX.length);
+  return `${base}/${objectKey}`;
+}
