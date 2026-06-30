@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>PitForge Link</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="logo-row">
+      <div class="logo-icon">🔥</div>
+      <h1>PitForge Link</h1>
+    </div>
+    <p class="subtitle">Stream live LMU telemetry to your pit wall</p>
+
+    <div class="field">
+      <label>Share code</label>
+      <input type="text" id="shareCode" class="share-input" maxlength="8" placeholder="ABC123" autocomplete="off" />
+      <p class="hint">Start a session in PitForge → Telemetry, then paste the 6-character code here</p>
+    </div>
+
+    <button class="btn btn-primary btn-block btn-lg" id="connectBtn">Connect</button>
+    <button class="btn btn-secondary btn-block" id="disconnectBtn" style="margin-top:8px;display:none">Disconnect</button>
+
+    <div class="status-card">
+      <div class="status-row">
+        <span>Status</span>
+        <span id="statusText"><span class="dot dot-gray"></span>Idle</span>
+      </div>
+      <div class="status-row">
+        <span>Le Mans Ultimate</span>
+        <span id="gameText">—</span>
+      </div>
+      <div class="status-row">
+        <span>Packets sent</span>
+        <span id="tickText">0</span>
+      </div>
+      <div class="status-row">
+        <span>Data source</span>
+        <span id="sourceText">—</span>
+      </div>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="message message-info" style="margin-top:auto">
+      <strong>How to connect:</strong><br />
+      1. Start a telemetry session on the PitForge website<br />
+      2. Launch Le Mans Ultimate and enter a session<br />
+      3. Enter your share code above and click Connect
+    </div>
+
+    <div class="footer-links">
+      <button id="settingsBtn">Settings</button>
+      <button id="helpBtn">Plugin help</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

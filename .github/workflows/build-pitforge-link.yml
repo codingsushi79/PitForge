@@ -1,0 +1,37 @@
+name: Build PitForge Link (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "pitforge-link/**"
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: pitforge-link
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: pitforge-link/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build NSIS installer
+        run: npm run dist:win
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PitForgeLink-Setup
+          path: pitforge-link/dist/PitForgeLink-Setup-*.exe

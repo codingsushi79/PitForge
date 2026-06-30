@@ -1,0 +1,69 @@
+{
+  "name": "pitforge-link",
+  "version": "1.0.0",
+  "description": "PitForge Link — stream LMU telemetry to your pit wall",
+  "main": "src/main.js",
+  "author": "PitForge",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win",
+    "dist:win": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.18",
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.pitforge.link",
+    "productName": "PitForge Link",
+    "copyright": "Copyright © PitForge",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "resources/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/",
+        "to": "resources/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "PitForgeLink-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PitForge Link",
+      "installerIcon": "build/icon.png",
+      "uninstallerIcon": "build/icon.png",
+      "installerHeaderIcon": "build/icon.png",
+      "include": "build/installer.nsh",
+      "license": "resources/LICENSE.txt"
+    }
+  }
+}
