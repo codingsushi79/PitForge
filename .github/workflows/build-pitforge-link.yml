@@ -8,6 +8,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -35,3 +38,10 @@ jobs:
         with:
           name: PitForgeLink-Setup
           path: pitforge-link/dist/PitForgeLink-Setup-*.exe
+
+      - name: Publish to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: pitforge-link/dist/PitForgeLink-Setup-*.exe
+          generate_release_notes: true
