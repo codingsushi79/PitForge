@@ -9,7 +9,6 @@ Windows desktop app + NSIS installer for streaming Le Mans Ultimate telemetry to
 3. Open **PitForge Link** from desktop/start menu
 4. **Setup wizard** (first launch):
    - Browse to Le Mans Ultimate folder
-   - Set PitForge server URL (e.g. `http://localhost:3009` or your Vercel URL)
    - Click **Install plugin & finish setup** — downloads the IronWolf plugin from GitHub, installs the DLL, and updates `CustomPluginVariables.JSON`
 5. In PitForge web app: **Telemetry → Start session** → copy **share code**
 6. Launch LMU, join a session

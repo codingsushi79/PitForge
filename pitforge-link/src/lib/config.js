@@ -1,17 +1,22 @@
 const Store = require("electron-store");
 
+const PITFORGE_SERVER_URL = "https://pitforge.sushii.dev";
+
 const store = new Store({
   name: "pitforge-link-config",
   defaults: {
     setupComplete: false,
     lmuPath: "",
-    serverUrl: "http://localhost:3009",
     pluginInstalled: false,
     demoMode: false,
     trackedCarNumber: null,
     trackedTeamName: "",
   },
 });
+
+function getServerUrl() {
+  return PITFORGE_SERVER_URL;
+}
 
 function getConfig() {
   return store.store;
@@ -36,4 +41,13 @@ function getLmuPlayerDataDir() {
   return lmu ? require("path").join(lmu, "UserData", "player") : "";
 }
 
-module.exports = { store, getConfig, setConfig, isSetupComplete, getLmuPluginsDir, getLmuPlayerDataDir };
+module.exports = {
+  store,
+  getConfig,
+  setConfig,
+  getServerUrl,
+  PITFORGE_SERVER_URL,
+  isSetupComplete,
+  getLmuPluginsDir,
+  getLmuPlayerDataDir,
+};

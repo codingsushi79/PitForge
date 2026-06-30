@@ -9,6 +9,7 @@
     "lint": "next lint",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
+    "import:tracks": "node scripts/import-track-traces.mjs",
     "bridge": "node bridge/index.js",
     "link:install": "cd pitforge-link && npm install",
     "link:dev": "cd pitforge-link && npm start",

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { brand } from "@/lib/brand";
-import { Download, Monitor, Wifi, Settings, CheckCircle2 } from "lucide-react";
+import { Download, Monitor, Wifi, CheckCircle2 } from "lucide-react";
 
 const DOWNLOAD_URL = "/downloads/PitForgeLink-Setup.exe";
 
@@ -9,8 +9,8 @@ export default function BridgePage() {
     <div className="max-w-3xl">
       <h1 className="mb-2 text-2xl font-bold">{brand.bridgeName}</h1>
       <p className="mb-8 text-muted">
-        Download the Windows installer — it configures LMU paths, installs the telemetry plugin,
-        and connects with a share code when your session is running.
+        Install the Windows companion app on your gaming PC to stream live Le Mans Ultimate
+        telemetry to your team&apos;s pit wall.
       </p>
 
       <div className="space-y-6">
@@ -20,55 +20,54 @@ export default function BridgePage() {
             <h2 className="text-lg font-semibold">Download for Windows</h2>
           </div>
           <p className="mb-4 text-sm text-muted">
-            PitForgeLink-Setup.exe installs {brand.bridgeName}, configures the rF2 shared memory
-            plugin in your LMU folder, and adds a desktop shortcut.
+            The installer sets up {brand.bridgeName} on your PC and walks you through connecting
+            to Le Mans Ultimate in a few minutes.
           </p>
           <a href={DOWNLOAD_URL} download className="btn-primary inline-flex">
             <Download className="h-4 w-4" />
-            Download PitForge Link installer
+            Download {brand.bridgeName}
           </a>
-          <p className="mt-3 text-xs text-muted">
-            Not built yet? Run <code className="text-accent">cd pitforge-link && npm run dist:win</code> on Windows,
-            or trigger the GitHub Actions workflow.
-          </p>
         </div>
 
         <div className="card space-y-4">
-          <h2 className="text-lg font-semibold">How to connect</h2>
-          <Step num={1} title="Install PitForge Link">
-            Run the installer, then open <strong>PitForge Link</strong> from your desktop.
-            The setup wizard asks for your Le Mans Ultimate folder and PitForge server URL —
-            it installs the plugin DLL and updates <code>CustomPluginVariables.JSON</code> for you.
+          <h2 className="text-lg font-semibold">Getting started</h2>
+          <Step num={1} title="Install and set up">
+            Run the installer, then open <strong>{brand.bridgeName}</strong> from your desktop.
+            The setup wizard will locate your Le Mans Ultimate folder and configure telemetry
+            automatically.
           </Step>
-          <Step num={2} title="Enable plugins in LMU">
-            In Le Mans Ultimate: Settings → Gameplay → Enable Plugins → ON. Restart the game.
+          <Step num={2} title="Enable plugins in the game">
+            In Le Mans Ultimate, open Settings → Gameplay and turn <strong>Enable Plugins</strong> on.
+            Restart the game once.
           </Step>
-          <Step num={3} title="Start a telemetry session">
-            In PitForge: Dashboard → Telemetry → <strong>Start session</strong>. Copy the{" "}
-            <strong>share code</strong> (6 characters).
+          <Step num={3} title="Start a live session">
+            In PitForge, go to Dashboard → Telemetry and click <strong>Start session</strong>.
+            Copy your <strong>session key</strong> — you&apos;ll need it in the next step.
           </Step>
-          <Step num={4} title="Launch the game & connect">
-            Start Le Mans Ultimate and join a session. Open PitForge Link, paste your share code,
-            and click <strong>Connect</strong>. Your pit wall updates live.
+          <Step num={4} title="Connect from your gaming PC">
+            Launch Le Mans Ultimate and join a session. Open {brand.bridgeName}, enter your session
+            key, and click <strong>Connect</strong>. Your pit wall updates in real time.
           </Step>
-          <Step num={5} title="Share with teammates">
-            Teammates watch at{" "}
-            <Link href="/dashboard/telemetry" className="text-accent hover:underline">Dashboard → Telemetry</Link>{" "}
-            or the public pit wall link — no install needed for viewers.
+          <Step num={5} title="Share with your team">
+            Teammates can follow along from{" "}
+            <Link href="/dashboard/telemetry" className="text-accent hover:underline">
+              Live telemetry
+            </Link>{" "}
+            or the public pit wall link — no install required for viewers.
           </Step>
         </div>
 
         <div className="card">
           <div className="mb-4 flex items-center gap-3">
             <Monitor className="h-6 w-6 text-accent" />
-            <h2 className="text-lg font-semibold">What the installer sets up</h2>
+            <h2 className="text-lg font-semibold">What the app configures</h2>
           </div>
           <ul className="space-y-2 text-sm">
             {[
-              "Copies rFactor2SharedMemoryMapPlugin64.dll to LMU/Plugins/",
-              "Enables plugin in CustomPluginVariables.JSON",
-              "Saves your PitForge server URL",
-              "Creates PitForge Link desktop shortcut",
+              "Le Mans Ultimate install path",
+              "Telemetry plugin for live data",
+              "In-game plugin settings",
+              "Desktop shortcut for quick access",
             ].map((item) => (
               <li key={item} className="flex items-center gap-2 text-muted">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
@@ -81,7 +80,7 @@ export default function BridgePage() {
         <div className="card">
           <div className="mb-4 flex items-center gap-3">
             <Wifi className="h-6 w-6 text-accent" />
-            <h2 className="text-lg font-semibold">What gets streamed</h2>
+            <h2 className="text-lg font-semibold">Live on your pit wall</h2>
           </div>
           <ul className="grid gap-2 text-sm md:grid-cols-2">
             {[
@@ -93,21 +92,15 @@ export default function BridgePage() {
               "Weather & track temp",
               "Session flags",
               "Engine & water temps",
-              "Automatic warnings",
+              "Smart warnings",
               "Pit stop count",
             ].map((item) => (
               <li key={item} className="flex items-center gap-2 text-muted">
-                <Settings className="h-3 w-3 text-accent" />
+                <CheckCircle2 className="h-3 w-3 text-accent shrink-0" />
                 {item}
               </li>
             ))}
           </ul>
-        </div>
-
-        <div className="card bg-surface-2">
-          <h3 className="mb-2 font-medium text-sm">CLI fallback (developers)</h3>
-          <pre className="text-xs text-muted overflow-x-auto">{`cd pitforge-link && npm start
-# or legacy: npm run bridge (from project root)`}</pre>
         </div>
       </div>
     </div>

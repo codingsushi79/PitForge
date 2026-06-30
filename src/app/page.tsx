@@ -135,7 +135,7 @@ export default function HomePage() {
               <div className="space-y-4 text-sm">
                 <div className="rounded-lg bg-surface-2 p-4">
                   <div className="font-medium text-accent">Le Mans Ultimate</div>
-                  <div className="text-muted">Shared memory via rF2 plugin</div>
+                  <div className="text-muted">Live session on track</div>
                 </div>
                 <div className="text-center text-muted">↓</div>
                 <div className="rounded-lg bg-surface-2 p-4">

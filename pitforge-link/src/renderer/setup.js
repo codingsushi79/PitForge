@@ -15,8 +15,6 @@ async function init() {
     if (guessed) lmuPath = guessed;
   }
   document.getElementById("lmuPath").value = lmuPath;
-  document.getElementById("serverUrl").value = config.serverUrl || "http://localhost:3009";
-  document.getElementById("demoMode").checked = !!config.demoMode;
 }
 
 function showMessage(text, type = "info") {
@@ -42,32 +40,30 @@ document.getElementById("browseBtn").addEventListener("click", async () => {
 document.getElementById("installBtn").addEventListener("click", async () => {
   const btn = document.getElementById("installBtn");
   btn.disabled = true;
-  btn.textContent = "Installing…";
+  btn.textContent = "Setting up…";
 
   const result = await window.pitforge.saveSetup({
     lmuPath: document.getElementById("lmuPath").value.trim(),
-    serverUrl: document.getElementById("serverUrl").value.trim(),
-    demoMode: document.getElementById("demoMode").checked,
   });
 
   if (!result.ok) {
     showMessage(result.error, "error");
     btn.disabled = false;
-    btn.textContent = "Install plugin & finish setup";
+    btn.textContent = "Finish setup";
     return;
   }
 
   showPluginLog(result.pluginResult.steps, result.pluginResult.errors);
 
   if (result.pluginResult.ok) {
-    showMessage("Setup complete! Enable Plugins in LMU gameplay settings, then restart the game.", "success");
+    showMessage("Setup complete! Turn on Plugins in LMU gameplay settings, then restart the game.", "success");
     btn.textContent = "Open PitForge Link";
     btn.disabled = false;
     btn.onclick = () => window.pitforge.setupFinished();
   } else {
-    showMessage("Setup saved with warnings — check plugin steps below. You may need to copy the DLL manually.", "error");
+    showMessage("Setup finished with warnings — see details below.", "error");
     btn.disabled = false;
-    btn.textContent = "Continue anyway";
+    btn.textContent = "Continue";
     btn.onclick = () => window.pitforge.setupFinished();
   }
 });

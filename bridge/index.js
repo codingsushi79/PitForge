@@ -4,12 +4,12 @@
  * Streams Le Mans Ultimate telemetry to the PitForge pit wall.
  *
  * Usage:
- *   BRIDGE_SESSION_ID=<session-id> BRIDGE_SERVER_URL=http://localhost:3009 npm run bridge
+ *   BRIDGE_SESSION_ID=<session-id> npm run bridge
  *   BRIDGE_DEMO=1 BRIDGE_SESSION_ID=<session-id> npm run bridge
  */
 
 const SESSION_ID = process.env.BRIDGE_SESSION_ID;
-const SERVER_URL = process.env.BRIDGE_SERVER_URL || "http://localhost:3000";
+const SERVER_URL = "https://pitforge.sushii.dev";
 const DEMO_MODE = process.env.BRIDGE_DEMO === "1";
 const INTERVAL_MS = 1000;
 

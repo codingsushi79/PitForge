@@ -68,7 +68,7 @@ The Postgres migration is already wired in. If you have a Neon database URL, you
 ## PitForge Link
 
 ```bash
-BRIDGE_SESSION_ID=<session-id> BRIDGE_SERVER_URL=https://your-app.vercel.app npm run bridge
+BRIDGE_SESSION_ID=<session-id> npm run bridge
 ```
 
 Use `BRIDGE_DEMO=1` to test without LMU.

@@ -90,8 +90,6 @@ ipcMain.handle("save-setup", async (_e, data) => {
 
   setConfig({
     lmuPath: data.lmuPath,
-    serverUrl: (data.serverUrl || "http://localhost:3009").replace(/\/$/, ""),
-    demoMode: !!data.demoMode,
   });
 
   const sendProgress = (message) => {
@@ -154,7 +152,7 @@ ipcMain.handle("open-external", (_e, url) => shell.openExternal(url));
 
 ipcMain.handle("connect", async (_e, shareCode) => {
   if (!shareCode || shareCode.length < 4) {
-    return { ok: false, error: "Enter a valid share code" };
+    return { ok: false, error: "Enter a valid session key" };
   }
   try {
     await telemetry.start(shareCode.trim().toUpperCase());

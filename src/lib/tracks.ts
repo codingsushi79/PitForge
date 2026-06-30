@@ -1,5 +1,4 @@
-import { CENTERLINES } from "./track-centerlines";
-import { centerlineToPath } from "./track-geometry";
+import { TRACK_TRACES } from "./track-traces";
 
 export interface TrackLayout {
   id: string;
@@ -13,6 +12,8 @@ export interface TrackLayout {
   centerline: [number, number][];
   /** Start/finish line position [x, y] in viewBox coords */
   startLine: [number, number];
+  /** RaceTracksAPI image id used as trace source */
+  traceId?: string;
 }
 
 export interface Track {
@@ -22,34 +23,35 @@ export interface Track {
   layouts: TrackLayout[];
 }
 
-function layout(
+function fromTrace(
   id: string,
   name: string,
   lengthKm: number,
-  viewBox: string,
-  centerline: [number, number][],
-  startIndex = 0
+  traceKey: string
 ): TrackLayout {
+  const trace = TRACK_TRACES[traceKey];
+  if (!trace) throw new Error(`Missing track trace: ${traceKey}`);
   return {
     id,
     name,
     lengthKm,
-    viewBox,
-    centerline,
-    path: centerlineToPath(centerline),
-    startLine: centerline[startIndex] ?? centerline[0],
+    viewBox: trace.viewBox,
+    path: trace.path,
+    centerline: trace.centerline,
+    startLine: trace.startLine,
+    traceId: trace.imageId,
   };
 }
 
-/** Circuit outlines for LMU tracks — centerlines traced from real layouts */
+/** LMU circuit layouts — traces from RaceTracksAPI SVG maps */
 export const TRACKS: Track[] = [
   {
     id: "le-mans",
     name: "Circuit de la Sarthe",
     country: "France",
     layouts: [
-      layout("full", "24h Layout", 13.626, "0 0 800 280", CENTERLINES.leMans),
-      layout("no-chicane", "Mulsanne No Chicanes", 13.535, "0 0 800 280", CENTERLINES.leMans),
+      fromTrace("full", "24h Layout", 13.626, "leMansFull"),
+      fromTrace("no-chicane", "Mulsanne No Chicanes", 13.535, "leMansNoChicane"),
     ],
   },
   {
@@ -57,8 +59,8 @@ export const TRACKS: Track[] = [
     name: "Spa-Francorchamps",
     country: "Belgium",
     layouts: [
-      layout("gp", "Grand Prix", 7.004, "0 0 640 520", CENTERLINES.spa),
-      layout("endurance", "Endurance Layout", 7.004, "0 0 640 520", CENTERLINES.spa),
+      fromTrace("gp", "Grand Prix", 7.004, "spa"),
+      fromTrace("endurance", "Endurance Layout", 7.004, "spa"),
     ],
   },
   {
@@ -66,8 +68,8 @@ export const TRACKS: Track[] = [
     name: "Autodromo Nazionale Monza",
     country: "Italy",
     layouts: [
-      layout("gp", "Grand Prix", 5.793, "0 0 680 280", CENTERLINES.monza),
-      layout("curva-grande", "Curva Grande Layout", 5.793, "0 0 680 280", CENTERLINES.monza),
+      fromTrace("gp", "Grand Prix", 5.793, "monzaGp"),
+      fromTrace("curva-grande", "Curva Grande Layout", 5.793, "monzaCurvaGrande"),
     ],
   },
   {
@@ -75,8 +77,8 @@ export const TRACKS: Track[] = [
     name: "Fuji Speedway",
     country: "Japan",
     layouts: [
-      layout("gp", "Grand Prix", 4.563, "0 0 550 400", CENTERLINES.fuji),
-      layout("classic", "Classic (No Chicane)", 4.563, "0 0 550 400", CENTERLINES.fuji),
+      fromTrace("gp", "Grand Prix", 4.563, "fujiGp"),
+      fromTrace("classic", "Classic (No Chicane)", 4.563, "fujiClassic"),
     ],
   },
   {
@@ -84,10 +86,10 @@ export const TRACKS: Track[] = [
     name: "Bahrain International Circuit",
     country: "Bahrain",
     layouts: [
-      layout("gp", "Grand Prix", 5.412, "0 0 500 450", CENTERLINES.bahrainGp),
-      layout("endurance", "Endurance Circuit", 6.299, "0 0 550 480", CENTERLINES.bahrainEndurance),
-      layout("outer", "Outer Circuit", 3.543, "0 0 450 400", CENTERLINES.bahrainOuter),
-      layout("paddock", "Paddock Circuit", 2.555, "0 0 400 350", CENTERLINES.bahrainPaddock),
+      fromTrace("gp", "Grand Prix", 5.412, "bahrainGp"),
+      fromTrace("endurance", "Endurance Circuit", 6.299, "bahrainEndurance"),
+      fromTrace("outer", "Outer Circuit", 3.543, "bahrainOuter"),
+      fromTrace("paddock", "Paddock Circuit", 2.555, "bahrainPaddock"),
     ],
   },
   {
@@ -95,44 +97,44 @@ export const TRACKS: Track[] = [
     name: "Sebring International Raceway",
     country: "USA",
     layouts: [
-      layout("gp", "Grand Prix", 6.019, "0 0 600 450", CENTERLINES.sebring),
-      layout("school", "School Circuit", 3.7, "0 0 450 350", CENTERLINES.sebringSchool),
+      fromTrace("gp", "Grand Prix", 6.019, "sebringGp"),
+      fromTrace("school", "School Circuit", 3.7, "sebringSchool"),
     ],
   },
   {
     id: "portimao",
     name: "Algarve International Circuit",
     country: "Portugal",
-    layouts: [layout("gp", "Grand Prix", 4.653, "0 0 550 420", CENTERLINES.portimao)],
+    layouts: [fromTrace("gp", "Grand Prix", 4.653, "portimao")],
   },
   {
     id: "imola",
     name: "Autodromo Enzo e Dino Ferrari",
     country: "Italy",
-    layouts: [layout("gp", "Grand Prix", 4.909, "0 0 500 480", CENTERLINES.imola)],
+    layouts: [fromTrace("gp", "Grand Prix", 4.909, "imola")],
   },
   {
     id: "cota",
     name: "Circuit of the Americas",
     country: "USA",
     layouts: [
-      layout("gp", "Grand Prix", 5.513, "0 0 550 450", CENTERLINES.cota),
-      layout("national", "National", 3.702, "0 0 450 380", CENTERLINES.cotaNational),
+      fromTrace("gp", "Grand Prix", 5.513, "cotaGp"),
+      fromTrace("national", "National", 3.702, "cotaNational"),
     ],
   },
   {
     id: "interlagos",
     name: "Autódromo José Carlos Pace",
     country: "Brazil",
-    layouts: [layout("gp", "Grand Prix", 4.309, "0 0 480 420", CENTERLINES.interlagos)],
+    layouts: [fromTrace("gp", "Grand Prix", 4.309, "interlagos")],
   },
   {
     id: "lusail",
     name: "Lusail International Circuit",
     country: "Qatar",
     layouts: [
-      layout("gp", "Grand Prix", 5.38, "0 0 520 400", CENTERLINES.lusail),
-      layout("short", "Short Layout", 3.28, "0 0 420 340", CENTERLINES.lusailShort),
+      fromTrace("gp", "Grand Prix", 5.38, "lusail"),
+      fromTrace("short", "Short Layout", 3.28, "lusailShort"),
     ],
   },
   {
@@ -140,22 +142,22 @@ export const TRACKS: Track[] = [
     name: "Silverstone Circuit",
     country: "UK",
     layouts: [
-      layout("gp", "Grand Prix (WEC)", 5.891, "0 0 580 420", CENTERLINES.silverstoneGp),
-      layout("national", "National", 2.639, "0 0 400 320", CENTERLINES.silverstoneNational),
-      layout("international", "International", 3.66, "0 0 450 350", CENTERLINES.silverstoneInternational),
+      fromTrace("gp", "Grand Prix (WEC)", 5.891, "silverstoneGp"),
+      fromTrace("national", "National", 2.639, "silverstoneNational"),
+      fromTrace("international", "International", 3.66, "silverstoneInternational"),
     ],
   },
   {
     id: "paul-ricard",
     name: "Circuit Paul Ricard",
     country: "France",
-    layouts: [layout("gp", "Grand Prix (1A)", 5.842, "0 0 560 400", CENTERLINES.paulRicard)],
+    layouts: [fromTrace("gp", "Grand Prix (1A)", 5.842, "paulRicard")],
   },
   {
     id: "barcelona",
     name: "Circuit de Barcelona-Catalunya",
     country: "Spain",
-    layouts: [layout("gp", "Grand Prix", 4.675, "0 0 540 420", CENTERLINES.barcelona)],
+    layouts: [fromTrace("gp", "Grand Prix", 4.675, "barcelona")],
   },
 ];
 

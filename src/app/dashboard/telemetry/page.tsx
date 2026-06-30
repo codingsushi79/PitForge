@@ -3,16 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { PitWall } from "@/components/pit-wall";
 import { createMockTelemetry, type TelemetrySession } from "@/lib/telemetry";
-import { Radio, Copy, Check, Play, Square } from "lucide-react";
+import { Radio, Copy, Check, Play, Square, ExternalLink } from "lucide-react";
 
 export default function TelemetryPage() {
   const [session, setSession] = useState<TelemetrySession | null>(null);
-  const [shareCode, setShareCode] = useState<string | null>(null);
+  const [sessionKey, setSessionKey] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [trackId, setTrackId] = useState("spa");
   const [copied, setCopied] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
-  const [bridgeConnected, setBridgeConnected] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [linkConnected, setLinkConnected] = useState(false);
 
   const fetchTelemetry = useCallback(async () => {
     if (!sessionId) return;
@@ -22,26 +22,26 @@ export default function TelemetryPage() {
         const data = await res.json();
         if (data.telemetry) {
           setSession(data.telemetry);
-          setBridgeConnected(true);
+          setLinkConnected(true);
         }
       }
     } catch {
-      /* bridge may be offline */
+      /* link may be offline */
     }
   }, [sessionId]);
 
   useEffect(() => {
-    if (!sessionId || demoMode) return;
+    if (!sessionId || previewMode) return;
     const interval = setInterval(fetchTelemetry, 1000);
     return () => clearInterval(interval);
-  }, [sessionId, demoMode, fetchTelemetry]);
+  }, [sessionId, previewMode, fetchTelemetry]);
 
   useEffect(() => {
-    if (!demoMode) return;
+    if (!previewMode) return;
     setSession(createMockTelemetry(trackId));
     const interval = setInterval(() => setSession(createMockTelemetry(trackId)), 2000);
     return () => clearInterval(interval);
-  }, [demoMode, trackId]);
+  }, [previewMode, trackId]);
 
   async function startSession() {
     const res = await fetch("/api/telemetry", {
@@ -52,7 +52,7 @@ export default function TelemetryPage() {
     if (res.ok) {
       const data = await res.json();
       setSessionId(data.id);
-      setShareCode(data.shareCode);
+      setSessionKey(data.shareCode);
     }
   }
 
@@ -61,15 +61,15 @@ export default function TelemetryPage() {
       await fetch(`/api/telemetry/${sessionId}`, { method: "DELETE" });
     }
     setSessionId(null);
-    setShareCode(null);
+    setSessionKey(null);
     setSession(null);
-    setDemoMode(false);
-    setBridgeConnected(false);
+    setPreviewMode(false);
+    setLinkConnected(false);
   }
 
-  function copyCode() {
-    if (shareCode) {
-      navigator.clipboard.writeText(shareCode);
+  function copyKey() {
+    if (sessionKey) {
+      navigator.clipboard.writeText(sessionKey);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -80,10 +80,10 @@ export default function TelemetryPage() {
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Live telemetry</h1>
-          <p className="text-muted">Pit wall view with track map, standings, and warnings</p>
+          <p className="text-muted">Your race-day pit wall — track map, standings, and warnings</p>
         </div>
         <div className="flex items-center gap-3">
-          {!sessionId && !demoMode && (
+          {!sessionId && !previewMode && (
             <>
               <select value={trackId} onChange={(e) => setTrackId(e.target.value)} className="input !w-auto">
                 <option value="spa">Spa</option>
@@ -104,12 +104,12 @@ export default function TelemetryPage() {
               <button onClick={startSession} className="btn-primary text-sm">
                 <Radio className="h-4 w-4" /> Start session
               </button>
-              <button onClick={() => setDemoMode(true)} className="btn-secondary text-sm">
-                <Play className="h-4 w-4" /> Demo mode
+              <button onClick={() => setPreviewMode(true)} className="btn-secondary text-sm">
+                <Play className="h-4 w-4" /> Preview pit wall
               </button>
             </>
           )}
-          {(sessionId || demoMode) && (
+          {(sessionId || previewMode) && (
             <button onClick={endSession} className="btn-secondary text-sm">
               <Square className="h-4 w-4" /> End session
             </button>
@@ -117,33 +117,36 @@ export default function TelemetryPage() {
         </div>
       </div>
 
-      {shareCode && (
+      {sessionKey && (
         <div className="mb-6 card flex flex-wrap items-center gap-4 !p-4">
           <div>
-            <span className="text-xs text-muted uppercase tracking-wider">Share code for teammates</span>
-            <div className="font-mono text-2xl font-bold text-accent">{shareCode}</div>
+            <span className="text-xs text-muted uppercase tracking-wider">Session key</span>
+            <div className="font-mono text-2xl font-bold text-accent">{sessionKey}</div>
           </div>
-          <button onClick={copyCode} className="btn-secondary text-sm">
+          <button onClick={copyKey} className="btn-secondary text-sm">
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? "Copied" : "Copy code"}
+            {copied ? "Copied" : "Copy key"}
           </button>
           <div className="text-sm text-muted">
-            Session ID: <code className="text-accent">{sessionId}</code>
-            {bridgeConnected && <span className="ml-2 text-accent">● PitForge Link connected</span>}
-            {!bridgeConnected && !demoMode && <span className="ml-2 text-warning">○ Waiting for PitForge Link…</span>}
+            {linkConnected ? (
+              <span className="text-accent">● PitForge Link connected</span>
+            ) : (
+              <span className="text-warning">○ Waiting for PitForge Link…</span>
+            )}
           </div>
-          <p className="text-xs text-muted w-full mt-2">
-            Open <strong>PitForge Link</strong> on your gaming PC and enter share code <strong>{shareCode}</strong>
+          <p className="text-sm text-muted w-full">
+            On your gaming PC, open <strong>PitForge Link</strong> and enter session key{" "}
+            <strong className="text-accent">{sessionKey}</strong>
           </p>
-          <a href={`/watch/${shareCode}`} target="_blank" className="btn-secondary text-sm">
-            Open pit wall view
+          <a href={`/watch/${sessionKey}`} target="_blank" className="btn-secondary text-sm">
+            <ExternalLink className="h-4 w-4" /> Open viewer link
           </a>
         </div>
       )}
 
-      {demoMode && (
+      {previewMode && (
         <div className="mb-4 rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 text-sm text-accent">
-          Demo mode — simulated telemetry data. Connect the Bridge app for live LMU data.
+          Preview mode — sample pit wall data for layout and features.
         </div>
       )}
 
@@ -152,8 +155,10 @@ export default function TelemetryPage() {
       ) : (
         <div className="card py-16 text-center text-muted">
           <Radio className="mx-auto mb-4 h-12 w-12 opacity-30" />
-          <p className="mb-2">Start a telemetry session or try demo mode</p>
-          <p className="text-sm">Run the Bridge app on your Windows PC with LMU to stream live data</p>
+          <p className="mb-2">Start a session to open your pit wall</p>
+          <p className="text-sm">
+            Connect PitForge Link on your gaming PC, or preview the layout first
+          </p>
         </div>
       )}
     </div>

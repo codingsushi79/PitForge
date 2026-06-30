@@ -54,6 +54,16 @@ export function TrackMap({
     GTE: "#ef4444",
   };
 
+  const vbParts = layout.viewBox.split(/\s+/).map(Number);
+  const vbWidth = vbParts[2] || 1000;
+  const trackStroke = vbWidth * 0.014;
+  const innerStroke = vbWidth * 0.011;
+  const markerR = vbWidth * 0.006;
+  const playerR = vbWidth * 0.009;
+  const pulseR = vbWidth * 0.015;
+  const labelSize = vbWidth * 0.014;
+  const lineHalf = vbWidth * 0.008;
+
   return (
     <div className={cn("card relative overflow-hidden p-4", className)}>
       <div className="mb-2 flex items-center justify-between">
@@ -75,7 +85,7 @@ export function TrackMap({
           d={layout.path}
           fill="none"
           stroke="#2a2a3a"
-          strokeWidth="18"
+          strokeWidth={trackStroke}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -83,17 +93,17 @@ export function TrackMap({
           d={layout.path}
           fill="none"
           stroke="#3a3a4a"
-          strokeWidth="14"
+          strokeWidth={innerStroke}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <line
-          x1={layout.startLine[0] - 8}
-          y1={layout.startLine[1] - 8}
-          x2={layout.startLine[0] + 8}
-          y2={layout.startLine[1] + 8}
+          x1={layout.startLine[0] - lineHalf}
+          y1={layout.startLine[1] - lineHalf}
+          x2={layout.startLine[0] + lineHalf}
+          y2={layout.startLine[1] + lineHalf}
           stroke="#fff"
-          strokeWidth="2"
+          strokeWidth={trackStroke * 0.15}
         />
         {pathReady &&
           vehicles.map((v) => {
@@ -103,24 +113,24 @@ export function TrackMap({
             return (
               <g key={v.id}>
                 {isPlayer && (
-                  <circle cx={x} cy={y} r="10" fill={color} opacity="0.3">
-                    <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
+                  <circle cx={x} cy={y} r={pulseR} fill={color} opacity="0.3">
+                    <animate attributeName="r" values={`${playerR};${pulseR};${playerR}`} dur="2s" repeatCount="indefinite" />
                   </circle>
                 )}
                 <circle
                   cx={x}
                   cy={y}
-                  r={isPlayer ? 6 : 4}
+                  r={isPlayer ? playerR : markerR}
                   fill={color}
                   stroke={isPlayer ? "#fff" : "none"}
-                  strokeWidth={isPlayer ? 2 : 0}
+                  strokeWidth={isPlayer ? playerR * 0.35 : 0}
                 />
                 <text
                   x={x}
-                  y={y - 10}
+                  y={y - playerR * 1.5}
                   textAnchor="middle"
                   fill="#fff"
-                  fontSize="9"
+                  fontSize={labelSize}
                   fontFamily="monospace"
                 >
                   P{v.position}

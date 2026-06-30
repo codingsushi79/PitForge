@@ -143,16 +143,16 @@ async function extractDllFromZip(zipBuffer) {
 }
 
 async function downloadPluginDll(onProgress) {
-  onProgress?.("Fetching latest download link from TheIronWolf GitHub…");
+  onProgress?.("Fetching telemetry plugin…");
   const pageUrl = await getDownloadPageUrlFromGithub();
 
-  onProgress?.("Resolving download URL…");
+  onProgress?.("Preparing download…");
   const directUrl = await resolveMediaFireDirectUrl(pageUrl);
 
-  onProgress?.("Downloading rF2 Shared Memory plugin…");
+  onProgress?.("Downloading telemetry plugin…");
   const zipBuffer = await downloadBinary(directUrl);
 
-  onProgress?.("Extracting plugin DLL…");
+  onProgress?.("Installing telemetry plugin…");
   const dllBuffer = await extractDllFromZip(zipBuffer);
   if (!dllBuffer || dllBuffer.length < 1024) {
     throw new Error("Downloaded plugin DLL looks invalid");
@@ -173,14 +173,14 @@ function getCachedDllPath() {
 async function ensurePluginDll(onProgress) {
   const cached = getCachedDllPath();
   if (fs.existsSync(cached)) {
-    onProgress?.("Using cached plugin DLL");
+    onProgress?.("Using cached telemetry plugin");
     return cached;
   }
 
   const dllBuffer = await downloadPluginDll(onProgress);
   fs.mkdirSync(path.dirname(cached), { recursive: true });
   fs.writeFileSync(cached, dllBuffer);
-  onProgress?.("Cached plugin DLL for future installs");
+  onProgress?.("Telemetry plugin ready");
   return cached;
 }
 

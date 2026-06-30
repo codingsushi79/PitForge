@@ -44,7 +44,7 @@ async function installPlugin(onProgress) {
   if (!fs.existsSync(pluginsDir)) {
     try {
       fs.mkdirSync(pluginsDir, { recursive: true });
-      steps.push(`Created Plugins folder: ${pluginsDir}`);
+      steps.push("Created Plugins folder");
     } catch (e) {
       errors.push(`Could not create Plugins folder: ${e.message}`);
     }
@@ -56,20 +56,20 @@ async function installPlugin(onProgress) {
   if (bundled) {
     try {
       fs.copyFileSync(bundled, destDll);
-      steps.push(`Installed ${PLUGIN_DLL} from bundled copy`);
+      steps.push("Installed telemetry plugin");
     } catch (e) {
-      errors.push(`Failed to copy bundled plugin DLL: ${e.message}`);
+      errors.push(`Could not install telemetry plugin: ${e.message}`);
     }
   } else {
     try {
       const sourceDll = await ensurePluginDll(onProgress);
       fs.copyFileSync(sourceDll, destDll);
-      steps.push(`Downloaded and installed ${PLUGIN_DLL} to Plugins folder`);
+      steps.push("Installed telemetry plugin");
     } catch (e) {
       if (fs.existsSync(destDll)) {
-        steps.push("Plugin DLL already present in Plugins folder (download skipped)");
+        steps.push("Telemetry plugin already installed");
       } else {
-        errors.push(`Failed to download plugin DLL: ${e.message}`);
+        errors.push(`Could not install telemetry plugin: ${e.message}`);
       }
     }
   }
@@ -88,9 +88,9 @@ async function installPlugin(onProgress) {
 
     config[PLUGIN_KEY] = { ...(config[PLUGIN_KEY] || {}), ...DEFAULT_PLUGIN_CONFIG };
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf8");
-    steps.push(`Updated CustomPluginVariables.JSON (set " Enabled": 1)`);
+    steps.push("Enabled telemetry in game settings");
   } catch (e) {
-    errors.push(`Failed to update plugin config: ${e.message}`);
+    errors.push(`Could not update game settings: ${e.message}`);
   }
 
   const readmeSrc = bundled

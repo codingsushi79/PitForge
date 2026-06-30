@@ -12,12 +12,12 @@
       <div class="logo-icon">🔥</div>
       <h1>PitForge Link</h1>
     </div>
-    <p class="subtitle">Stream live LMU telemetry to your pit wall</p>
+    <p class="subtitle">Stream live telemetry to your pit wall</p>
 
     <div class="field">
-      <label>Share code</label>
+      <label>Session key</label>
       <input type="text" id="shareCode" class="share-input" maxlength="8" placeholder="ABC123" autocomplete="off" />
-      <p class="hint">Start a session in PitForge → Telemetry, then paste the 6-character code here</p>
+      <p class="hint">Start a session on pitforge.sushii.dev → Telemetry, then enter your key here</p>
     </div>
 
     <button class="btn btn-primary btn-block btn-lg" id="connectBtn">Connect</button>
@@ -33,11 +33,11 @@
         <span id="gameText">—</span>
       </div>
       <div class="status-row">
-        <span>Packets sent</span>
+        <span>Updates sent</span>
         <span id="tickText">0</span>
       </div>
       <div class="status-row">
-        <span>Data source</span>
+        <span>Connection</span>
         <span id="sourceText">—</span>
       </div>
     </div>
@@ -45,15 +45,15 @@
     <div id="message"></div>
 
     <div class="message message-info" style="margin-top:auto">
-      <strong>How to connect:</strong><br />
-      1. Start a telemetry session on the PitForge website<br />
-      2. Launch Le Mans Ultimate and enter a session<br />
-      3. Enter your share code above and click Connect
+      <strong>Quick start</strong><br />
+      1. Start a live session on the PitForge website<br />
+      2. Launch Le Mans Ultimate and join a session<br />
+      3. Enter your session key above and click Connect
     </div>
 
     <div class="footer-links">
       <button id="settingsBtn">Settings</button>
-      <button id="helpBtn">Plugin help</button>
+      <button id="helpBtn">Help</button>
     </div>
   </div>
   <script src="app.js"></script>

@@ -1,4 +1,4 @@
-const { getConfig, setConfig } = require("./config");
+const { getConfig, setConfig, getServerUrl } = require("./config");
 const { readTelemetry } = require("./telemetry-windows");
 
 function lockTeamTracking(data) {
@@ -57,8 +57,8 @@ class TelemetryClient {
   }
 
   async resolveShareCode(code) {
-    const { serverUrl } = getConfig();
-    const url = `${serverUrl.replace(/\/$/, "")}/api/telemetry?code=${encodeURIComponent(code.toUpperCase())}`;
+    const serverUrl = getServerUrl();
+    const url = `${serverUrl}/api/telemetry?code=${encodeURIComponent(code.toUpperCase())}`;
     const res = await fetch(url);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -72,8 +72,8 @@ class TelemetryClient {
   }
 
   async send(data) {
-    const { serverUrl } = getConfig();
-    const url = `${serverUrl.replace(/\/$/, "")}/api/telemetry/${this.sessionId}`;
+    const serverUrl = getServerUrl();
+    const url = `${serverUrl}/api/telemetry/${this.sessionId}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

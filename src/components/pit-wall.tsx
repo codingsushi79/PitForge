@@ -32,22 +32,22 @@ export function PitWall({ data, trackLayoutId = "gp" }: PitWallProps) {
         </span>
       </div>
 
-      {data.warnings.length > 0 && (
-        <div className="grid gap-2 md:grid-cols-2">
-          {data.warnings.map((w, i) => (
-            <WarningCard key={i} warning={w} />
-          ))}
-        </div>
-      )}
-
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-4">
           <TrackMap
             trackId={data.trackId}
             layoutId={trackLayoutId}
             vehicles={data.vehicles}
             playerVehicleId={playerVehicleId}
           />
+
+          {data.warnings.length > 0 && (
+            <div className="grid gap-2">
+              {data.warnings.map((w, i) => (
+                <WarningCard key={i} warning={w} />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">

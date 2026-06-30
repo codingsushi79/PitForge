@@ -1,7 +1,7 @@
 {
   "name": "pitforge-link",
-  "version": "1.0.0",
-  "description": "PitForge Link — stream LMU telemetry to your pit wall",
+  "version": "1.0.2",
+  "description": "PitForge Link - stream LMU telemetry to your pit wall",
   "main": "src/main.js",
   "author": "PitForge",
   "license": "MIT",
@@ -51,7 +51,7 @@
           ]
         }
       ],
-      "icon": "build/icon.png",
+      "icon": "build/icon.ico",
       "artifactName": "PitForgeLink-Setup-${version}.${ext}"
     },
     "nsis": {
@@ -61,9 +61,9 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "PitForge Link",
-      "installerIcon": "build/icon.png",
-      "uninstallerIcon": "build/icon.png",
-      "installerHeaderIcon": "build/icon.png",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
       "include": "build/installer.nsh",
       "license": "resources/LICENSE.txt"
     }

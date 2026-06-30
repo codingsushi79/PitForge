@@ -37,11 +37,11 @@ export default function WatchTelemetry({ shareCode }: { shareCode: string }) {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <Logo href="/" size="sm" />
-            <p className="text-sm text-muted">Live pit wall · Code {shareCode}</p>
+            <p className="text-sm text-muted">Live pit wall</p>
           </div>
           {!session && !error && (
             <span className="flex items-center gap-2 text-sm text-muted">
-              <Radio className="h-4 w-4 animate-pulse text-accent" /> Waiting for data...
+              <Radio className="h-4 w-4 animate-pulse text-accent" /> Waiting for live data…
             </span>
           )}
         </div>
@@ -52,7 +52,7 @@ export default function WatchTelemetry({ shareCode }: { shareCode: string }) {
         ) : (
           <div className="card text-center py-16 text-muted">
             <Radio className="mx-auto mb-4 h-12 w-12 animate-pulse opacity-30" />
-            Waiting for driver to connect bridge app...
+            Waiting for the driver to connect…
           </div>
         )}
       </div>

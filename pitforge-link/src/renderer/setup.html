@@ -12,12 +12,11 @@
       <div class="logo-icon">🔥</div>
       <h1>PitForge Link Setup</h1>
     </div>
-    <p class="subtitle">Configure paths once — we'll install the telemetry plugin and settings for you.</p>
+    <p class="subtitle">A one-time setup — we&apos;ll connect PitForge to your game automatically.</p>
 
     <ol class="steps">
       <li><strong>Step 1</strong> — Point to your Le Mans Ultimate install folder</li>
-      <li><strong>Step 2</strong> — Set your PitForge server URL</li>
-      <li><strong>Step 3</strong> — We download the IronWolf plugin from GitHub &amp; enable it in config</li>
+      <li><strong>Step 2</strong> — We install and enable live telemetry for your game</li>
     </ol>
 
     <div class="field">
@@ -26,18 +25,7 @@
         <input type="text" id="lmuPath" placeholder="C:\Program Files (x86)\Steam\steamapps\common\Le Mans Ultimate" />
         <button class="btn btn-secondary" id="browseBtn">Browse</button>
       </div>
-      <p class="hint">The folder containing Le Mans Ultimate.exe (or Plugins/UserData subfolders)</p>
-    </div>
-
-    <div class="field">
-      <label>PitForge server URL</label>
-      <input type="text" id="serverUrl" placeholder="http://localhost:3009" />
-      <p class="hint">Your PitForge web app URL — use localhost for dev, or your Vercel URL in production</p>
-    </div>
-
-    <div class="field checkbox-row">
-      <input type="checkbox" id="demoMode" />
-      <label for="demoMode" style="margin:0;text-transform:none;font-weight:400;">Demo mode (stream simulated data without LMU running)</label>
+      <p class="hint">The folder that contains Le Mans Ultimate.exe</p>
     </div>
 
     <div id="progress" class="progress" style="display:none"></div>
@@ -45,7 +33,7 @@
     <div id="pluginLog" class="plugin-log" style="display:none"></div>
 
     <button class="btn btn-primary btn-block btn-lg" id="installBtn" style="margin-top:16px">
-      Install plugin &amp; finish setup
+      Finish setup
     </button>
   </div>
   <script src="setup.js"></script>

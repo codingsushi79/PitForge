@@ -28,9 +28,9 @@ function setConnected(val) {
 
 function formatSource(source) {
   const map = {
-    live: "Live (shared memory)",
+    live: "Live",
     "game-detected": "Game running",
-    demo: "Demo / simulated",
+    demo: "Practice",
     waiting: "Waiting for game",
   };
   return map[source] || source || "—";
@@ -77,7 +77,7 @@ window.pitforge.onTelemetryStatus((status) => {
 connectBtn.addEventListener("click", async () => {
   const code = shareInput.value.trim().toUpperCase();
   if (!code) {
-    showMessage("Enter the share code from PitForge Telemetry", "error");
+    showMessage("Enter the session key from PitForge Telemetry", "error");
     return;
   }
 
@@ -106,7 +106,7 @@ document.getElementById("settingsBtn").addEventListener("click", () => {
 });
 
 document.getElementById("helpBtn").addEventListener("click", () => {
-  window.pitforge.openExternal("https://github.com/TheIronWolfModding/rF2SharedMemoryMapPlugin");
+  window.pitforge.openExternal("https://pitforge.sushii.dev/dashboard/bridge");
 });
 
 shareInput.addEventListener("input", () => {

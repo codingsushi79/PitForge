@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-/** Generate 256x256 PNG (+ multi-size ICO) for electron-builder */
+/** Generate 256x256 PNG + classic multi-size ICO for electron-builder / NSIS */
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
 const OUT_DIR = __dirname;
 const SIZE = 256;
+const ICO_SIZES = [16, 32, 48, 256];
 
 const COLORS = {
   bg: [13, 13, 18, 255],
@@ -64,8 +65,8 @@ function createPng(width, height, pixelAt) {
   ]);
 }
 
-function dist(x1, y1, x2, y2) {
-  return Math.hypot(x1 - x2, y1 - y2);
+function blend(a, b, t) {
+  return a.map((v, i) => Math.round(v + (b[i] - v) * t));
 }
 
 function pixelAt(x, y, w, h) {
@@ -75,17 +76,14 @@ function pixelAt(x, y, w, h) {
   const ny = (y - cy) / (h * 0.42);
   const r = Math.hypot(nx, ny);
 
-  // Rounded square background
   const corner = Math.max(Math.abs(nx), Math.abs(ny));
   if (corner > 1.02) return COLORS.bg;
 
-  // Ember ring
   if (r > 0.78 && r < 0.95) {
     const t = (r - 0.78) / 0.17;
     return blend(COLORS.accent, COLORS.accentLight, t);
   }
 
-  // Inner forge mark — stylized flame / link
   const flame =
     ny < 0.15 + 0.55 * Math.exp(-Math.pow(nx * 2.2, 2)) &&
     ny > -0.55 &&
@@ -100,41 +98,86 @@ function pixelAt(x, y, w, h) {
   return COLORS.bg;
 }
 
-function blend(a, b, t) {
-  return a.map((v, i) => Math.round(v + (b[i] - v) * t));
+/** Classic BMP-in-ICO image (required by NSIS makensis). */
+function createIconBitmap(width, height) {
+  const rowBytes = width * 4;
+  const xorSize = rowBytes * height;
+  const andRowBytes = Math.ceil(width / 32) * 4;
+  const andSize = andRowBytes * height;
+
+  const header = Buffer.alloc(40);
+  header.writeUInt32LE(40, 0);
+  header.writeInt32LE(width, 4);
+  header.writeInt32LE(height * 2, 8);
+  header.writeUInt16LE(1, 12);
+  header.writeUInt16LE(32, 14);
+  header.writeUInt32LE(0, 16);
+  header.writeUInt32LE(xorSize + andSize, 20);
+
+  const xor = Buffer.alloc(xorSize);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const [r, g, b, a] = pixelAt(x, y, width, height);
+      const dstY = height - 1 - y;
+      const off = (dstY * width + x) * 4;
+      xor[off] = b;
+      xor[off + 1] = g;
+      xor[off + 2] = r;
+      xor[off + 3] = a;
+    }
+  }
+
+  const and = Buffer.alloc(andSize);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const [, , , a] = pixelAt(x, y, width, height);
+      if (a >= 128) continue;
+      const dstY = height - 1 - y;
+      const byteIndex = dstY * andRowBytes + (x >> 3);
+      and[byteIndex] |= 0x80 >> (x & 7);
+    }
+  }
+
+  return Buffer.concat([header, xor, and]);
 }
 
-function createIcoFromPng(pngBuffer, size) {
-  // ICO with embedded PNG (Vista+ format)
+function createClassicIco(sizes) {
+  const images = sizes.map((size) => ({
+    width: size,
+    height: size,
+    data: createIconBitmap(size, size),
+  }));
+
   const header = Buffer.alloc(6);
   header.writeUInt16LE(0, 0);
   header.writeUInt16LE(1, 2);
-  header.writeUInt16LE(1, 4);
+  header.writeUInt16LE(images.length, 4);
 
-  const entry = Buffer.alloc(16);
-  entry[0] = size >= 256 ? 0 : size;
-  entry[1] = size >= 256 ? 0 : size;
-  entry[2] = 0;
-  entry[3] = 0;
-  entry[4] = 1;
-  entry[5] = 0;
-  entry.writeUInt16LE(32, 6);
-  entry.writeUInt32LE(pngBuffer.length, 8);
-  entry.writeUInt32LE(22, 12);
+  let offset = 6 + images.length * 16;
+  const entries = images.map((img) => {
+    const entry = Buffer.alloc(16);
+    entry[0] = img.width >= 256 ? 0 : img.width;
+    entry[1] = img.height >= 256 ? 0 : img.height;
+    entry[4] = 1;
+    entry.writeUInt16LE(32, 6);
+    entry.writeUInt32LE(img.data.length, 8);
+    entry.writeUInt32LE(offset, 12);
+    offset += img.data.length;
+    return entry;
+  });
 
-  return Buffer.concat([header, entry, pngBuffer]);
+  return Buffer.concat([header, ...entries, ...images.map((img) => img.data)]);
 }
 
 function main() {
-  const png = createPng(SIZE, SIZE, pixelAt);
   const pngPath = path.join(OUT_DIR, "icon.png");
-  fs.writeFileSync(pngPath, png);
-
   const icoPath = path.join(OUT_DIR, "icon.ico");
-  fs.writeFileSync(icoPath, createIcoFromPng(png, SIZE));
+
+  fs.writeFileSync(pngPath, createPng(SIZE, SIZE, pixelAt));
+  fs.writeFileSync(icoPath, createClassicIco(ICO_SIZES));
 
   console.log(`Wrote ${pngPath} (${SIZE}x${SIZE})`);
-  console.log(`Wrote ${icoPath}`);
+  console.log(`Wrote ${icoPath} (${ICO_SIZES.join(", ")}px classic ICO)`);
 }
 
 main();
